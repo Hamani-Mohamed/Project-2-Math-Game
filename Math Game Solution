@@ -1,0 +1,240 @@
+#include <iostream>
+#include <string>
+#include <cstdlib>
+#include <ctime>
+#include <cmath>
+using namespace std;
+
+enum enDifficulty { Easy = 1, Normal = 2, Hard = 3, Mixed = 4};
+enum enOperationType { Add = 1, Sub = 2, Mul = 3, Div = 4, Mix = 5};
+struct stResults
+{
+	short NumberOfQuestions;
+	string OperationType;
+	string GameDifficulty;
+	short RightAnswers;
+	short WrongAnswers;
+};
+
+int RandomNum(short from, short to)
+{
+	int num = rand() % (to - from + 1) + from;
+	return num;
+}
+
+enDifficulty GameDifficulty(short GameDifficulty)
+{
+	if (GameDifficulty == 1)
+		return enDifficulty::Easy;
+	else if (GameDifficulty == 2)
+		return enDifficulty::Normal;
+	else if (GameDifficulty == 3)
+		return enDifficulty::Hard;
+	else if (GameDifficulty == 4)
+		return enDifficulty::Mixed;
+}
+
+enOperationType OperationType(short OperationType)
+{
+	if (OperationType == 1)
+		return enOperationType::Add;
+	else if (OperationType == 2)
+		return enOperationType::Sub;
+	else if (OperationType == 3)
+		return enOperationType::Mul;
+	else if (OperationType == 4)
+		return enOperationType::Div;
+	else if (OperationType == 5)
+		return enOperationType::Mix;
+}
+
+string DifficultyName(short GameDifficulty)
+{
+	string arrGameDifficulty[4] = { "Easy", "Normal", "Hard", "Mixed"};
+	return arrGameDifficulty[GameDifficulty - 1];
+}
+
+string OperationName(short OperationName)
+{
+	string arrOperationName[5] = { "Add", "Subtract", "Multiply", "Divide", "Mixed"};
+	return arrOperationName[OperationName - 1];
+}
+
+short NumOfQuestions()
+{
+	short questions;
+	do
+	{
+		cout << "Please enter how many questions you'd like to answer (1 to 10) : ";
+		cin >> questions;
+	} while (questions < 1 || questions > 10);
+	return questions;
+}
+
+enDifficulty ReadDifficulty()
+{
+	short Difficulty;
+	do
+	{
+		cout << "Please enter level difficulty ( [1] = Easy, [2] = Normal, [3] = Hard, [4] = Mix ) : ";
+		cin >> Difficulty;
+	} while (Difficulty < 1 || Difficulty > 4);
+	return (enDifficulty)Difficulty;
+}
+
+enOperationType ReadOperationType()
+{
+	short OperationType;
+	do
+	{
+		cout << "Please enter Operation Type ( [1] = Add, [2] = Subtract, [3] = Multiply, [4] = Divide, [5] = Mix ) : ";
+		cin >> OperationType;
+	} while (OperationType < 1 || OperationType > 5);
+	return (enOperationType)OperationType;
+}
+
+short GenerateQuestion(enDifficulty GameDifficulty, enOperationType OperationType)
+{
+	short num1, num2, CorrectAnswer = 0;
+	if (GameDifficulty == enDifficulty::Easy)
+	{
+		num1 = RandomNum(1, 10);
+		num2 = RandomNum(1, 10);
+	}
+	else if (GameDifficulty == enDifficulty::Normal)
+	{
+		num1 = RandomNum(10, 50);
+		num2 = RandomNum(10, 50);
+	}
+	else if (GameDifficulty == enDifficulty::Hard)
+	{
+		num1 = RandomNum(50, 100);
+		num2 = RandomNum(50, 100);
+	}
+	else
+	{
+		num1 = RandomNum(1, 100);
+		num2 = RandomNum(1, 100);
+	}
+
+	if (OperationType == enOperationType::Mix)
+		OperationType = (enOperationType)RandomNum(1, 4);
+
+	switch (OperationType)
+	{
+	case enOperationType::Add:
+		CorrectAnswer = num1 + num2;
+		cout << num1 << " +\n" << num2 << "\n_____\n";
+		break;
+	case enOperationType::Sub:
+		if (num2 > num1)
+		{
+			swap(num1,num2);
+		}
+		CorrectAnswer = num1 - num2;
+		cout << num1 << " -\n" << num2 << "\n_____\n";
+		break;
+	case enOperationType::Mul:
+		CorrectAnswer = num1 * num2;
+		cout << num1 << " *\n" << num2 << "\n_____\n";
+		break;
+	case enOperationType::Div:
+		CorrectAnswer = num1 / num2;
+		cout << num1 << " /\n" << num2 << "\n_____\n";
+		break;
+	}
+	return CorrectAnswer;
+}
+
+stResults FillGameResults(short HowManyQuestions, string Difficulty, string OperationType, short RightAnswers, short WrongAnswers)
+{
+	stResults Results;
+	Results.NumberOfQuestions = HowManyQuestions;
+	Results.GameDifficulty = Difficulty;
+	Results.OperationType = OperationType;
+	Results.RightAnswers = RightAnswers;
+	Results.WrongAnswers = WrongAnswers;
+	return Results;
+}
+
+stResults Quiz()
+{
+	stResults Results;
+	short RightAnswers = 0, WrongAnswers = 0;
+	short HowManyQuestions = NumOfQuestions();
+	short Difficulty = ReadDifficulty();
+	short OperationType = ReadOperationType();
+	short answer, CorrectAnswer;
+	
+	for (short questionNumber = 1; questionNumber <= HowManyQuestions; questionNumber++)
+	{
+		cout << "\n\nQuestion [" << questionNumber << "/" << HowManyQuestions << "] :\n\n";
+		CorrectAnswer = GenerateQuestion((enDifficulty)Difficulty, (enOperationType)OperationType);
+		cin >> answer;
+		if (answer == CorrectAnswer)
+		{
+			system("color 20");
+			cout << "\nYour answer is correct :)\n\n__________________________\n";
+			RightAnswers++;
+		}
+		else
+		{
+			system("color 40");
+			cout << "\a\nYour answer is incorrect :(\n";
+			cout << "The right answer is : " << CorrectAnswer << endl;
+			cout << "__________________________\n";
+			WrongAnswers++;
+		}
+	}
+	return FillGameResults(HowManyQuestions, DifficultyName(Difficulty), OperationName(OperationType), RightAnswers, WrongAnswers);
+}
+
+void FinalGrade(stResults results)
+{
+	if (results.RightAnswers > results.WrongAnswers)
+		cout << "\nFinal Result : PASS!\n_________________________\n\n";
+	else if (results.RightAnswers < results.WrongAnswers)
+		cout << "\nFinal Result : FAIL!\n_________________________\n\n";
+	else 
+	{
+		cout << "\nDAYUM! You are no winner, but no loser either D:\n_________________________\n\n";
+		system("color 60");
+	}
+}
+
+void PrintResults(stResults results)
+{
+	cout << "Number Of Questions : " << results.NumberOfQuestions << endl;
+	cout << "Game Difficulty : " << results.GameDifficulty << endl;
+	cout << "Operation Type : " << results.OperationType << endl;
+	cout << "Number Of Right Answers : " << results.RightAnswers << endl;
+	cout << "Number Of Wrong Answers : " << results.WrongAnswers << endl;
+}
+
+void ResetScreen()
+{
+	system("cls");
+	system("Color 0F");
+}
+
+void StartGame()
+{
+	char again = 'y';
+	do
+	{
+		ResetScreen();
+		stResults results = Quiz();
+		FinalGrade(results);
+		PrintResults(results);
+		cout << "Would you like to play again? [Y/N] : ";
+		cin >> again;
+	} while (again == 'Y' || again == 'y');
+	system("Color 0F");
+	cout << "\nThanks for playing! :)" << endl;
+}
+
+int main()
+{
+	srand((unsigned)time(NULL));
+	StartGame();
+}
